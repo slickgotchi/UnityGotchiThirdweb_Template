@@ -11,11 +11,11 @@ public class GotchiStatsCard : MonoBehaviour
     public TextMeshProUGUI DoubleStrikeText;
     public TextMeshProUGUI CritDamageText;
 
-    private void Update()
+    public void UpdateStatsCard()
     {
         if (GotchiDataManager.Instance.gotchiData.Count <= 0) return;
 
-        var gotchiData = GotchiDataManager.Instance.GetSelectedGotchiData();
+        var gotchiData = GotchiDataManager.Instance.GetGotchiDataBySelected();
         if (gotchiData == null) return;
 
         // get kinship

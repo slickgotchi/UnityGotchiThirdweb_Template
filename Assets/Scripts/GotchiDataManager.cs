@@ -20,14 +20,87 @@ public class GotchiDataManager : MonoBehaviour
     public List<GotchiSvgs> gotchiSvgs = new List<GotchiSvgs>();
     public List<string> gotchiIds = new List<string>();
 
+    private int m_selectedGotchiId = 0;
+
     private void Awake()
     {
         Instance = this;
     }
 
-    public GotchiData GetSelectedGotchiData()
+    public int GetSelectedGotchiId() { return m_selectedGotchiId; }
+
+    public bool SetSelectedGotchiByIndex(int index)
     {
-        return gotchiData[0];
+        if (index >= gotchiData.Count)
+        {
+            Debug.Log("Can not set index " + index + " with gotchiData count of " + gotchiData.Count);
+            return false;
+        }
+
+        m_selectedGotchiId = gotchiData[index].id;
+        return true;
+    }
+
+    public bool SetSelectedGotchiById(int id)
+    {
+        for (int i = 0; i < gotchiData.Count; i++)
+        {
+            if (id == gotchiData[i].id)
+            {
+                m_selectedGotchiId = id;
+                return true;
+            }
+        }
+
+        Debug.Log("Gotchi with id " + id + " does not exist in GotchiDataManager");
+        return false;
+    }
+
+    private int GetGotchiIndexById(int id)
+    {
+        for (int i = 0; i < gotchiData.Count; i++)
+        {
+            if (id == gotchiData[i].id)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public GotchiData GetGotchiDataById(int id)
+    {
+        var index = GetGotchiIndexById(id);
+        if (index < 0)
+        {
+            Debug.Log("Invalid id passed to GetGotchiDataById()");
+            return null;
+        }
+
+        return gotchiData[index];
+    }
+
+    public GotchiData GetGotchiDataBySelected()
+    {
+        return GetGotchiDataById(m_selectedGotchiId);
+    }
+
+    public GotchiSvgs GetGotchiSvgsById(int id)
+    {
+        var index = GetGotchiIndexById(id);
+        if (index < 0)
+        {
+            Debug.Log("Invalid id passed to GetGotchSvgsById()");
+            return null;
+        }
+
+        return gotchiSvgs[index];
+    }
+
+    public GotchiSvgs GetGotchiSvgsBySelected()
+    {
+        return GetGotchiSvgsById(m_selectedGotchiId);
     }
 
     public async void FetchGotchiData()
@@ -70,9 +143,18 @@ public class GotchiDataManager : MonoBehaviour
                 });
             }
 
-            // update canvas
-            gotchiSelectCanvas.UpdateGotchiList();
-            Debug.Log("Gotchi list updated");
+            // default to first gotchi in list
+            if (gotchiData.Count > 0)
+            {
+                GotchiDataManager.Instance.SetSelectedGotchiByIndex(0);
+                // update canvas
+                gotchiSelectCanvas.UpdateGotchiList();
+                Debug.Log("Gotchi list updated");
+
+                // get default id
+                gotchiSelectCanvas.SetAvatarById(m_selectedGotchiId);
+            }
+
         }
         catch (Exception ex)
         {
@@ -82,7 +164,7 @@ public class GotchiDataManager : MonoBehaviour
 
 }
 
-public struct GotchiSvgs
+public class GotchiSvgs
 {
     public string svg;
     public string back;

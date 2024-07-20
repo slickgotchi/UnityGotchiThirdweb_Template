@@ -215,7 +215,7 @@ GameObject:
   - component: {fileID: 2941568590348046219}
   - component: {fileID: 981677457258814865}
   m_Layer: 5
-  m_Name: GotchiListItem
+  m_Name: GotchiSelect_ListItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
