@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class GotchiSelectCanvas : MonoBehaviour
 {
+    public static GotchiSelectCanvas Instance { get; private set; }
+
     public GotchiDataManager gotchiDataManager;
     public Button SelectGotchiButton;
     public GameObject gotchiList;
@@ -13,6 +15,7 @@ public class GotchiSelectCanvas : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
         SelectGotchiButton.onClick.AddListener(() => gotchiDataManager.FetchGotchiData());
     }
 
@@ -21,15 +24,21 @@ public class GotchiSelectCanvas : MonoBehaviour
         // 1. clear out existing children
         ClearGotchiListChildren();
 
-        Debug.Log(gotchiDataManager.gotchiSvgs.Count);
+        Debug.Log("Number svg sets: " + gotchiDataManager.gotchiSvgs.Count);
 
         // 2. create new instance of gotchi list item and set parent to gotchi list
         var gotchiSvgs = gotchiDataManager.gotchiSvgs;
-        foreach (var gotchiSvgSet in gotchiSvgs)
+        var gotchiData = gotchiDataManager.gotchiData;
+        for (int i = 0; i < gotchiSvgs.Count; i++)
         {
+            var gotchiSvg = gotchiSvgs[i];
+
             var newListItem = Instantiate(gotchiListItemPrefab);
             newListItem.transform.SetParent(gotchiList.transform, false);
-            newListItem.GetComponentInChildren<SVGImage>().sprite = SvgLoader.CreateSvgSprite(gotchiDataManager.stylingUI.CustomizeSVG(gotchiSvgSet.svg), Vector2.zero);
+            newListItem.GetComponentInChildren<SVGImage>().sprite = SvgLoader.CreateSvgSprite(gotchiDataManager.stylingUI.CustomizeSVG(gotchiSvg.svg), Vector2.zero);
+
+            var listItem = newListItem.GetComponent<GotchiSelect_ListItem>();
+            listItem.Id = gotchiData[i].id;
         }
         Debug.Log("Added UI sprites");
     }
