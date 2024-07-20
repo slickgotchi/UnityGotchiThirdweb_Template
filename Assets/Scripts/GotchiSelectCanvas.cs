@@ -15,16 +15,58 @@ public class GotchiSelectCanvas : MonoBehaviour
 
     public SVGImage AvatarSvgImage;
     public GotchiStatsCard GotchiStatsCard;
+    public GameObject GotchiSelect_Menu;
+
+    private bool m_isShowButtonJustClicked = false;
 
     private void Awake()
     {
         Instance = this;
-        SelectGotchiButton.onClick.AddListener(() => gotchiDataManager.FetchGotchiData());
+        SelectGotchiButton.onClick.AddListener(HandleOnClick_GotchiSelect_ShowButton);
+    }
+
+    private void Start()
+    {
+        SetMenuVisible(false);
+        
+    }
+
+    void HandleOnClick_GotchiSelect_ShowButton()
+    {
+        try
+        {
+            gotchiDataManager.FetchGotchiData();
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log(e);
+        }
+        SetMenuVisible(true);
+        m_isShowButtonJustClicked = true;
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0) && !m_isShowButtonJustClicked)
+        {
+            var menuRect = GotchiSelect_Menu.GetComponent<RectTransform>();
+            var isMenuClick = RectTransformUtility.RectangleContainsScreenPoint(menuRect, Input.mousePosition);
+            SetMenuVisible(isMenuClick);
+        }
+
+        m_isShowButtonJustClicked = false;
+    }
+
+    public void SetMenuVisible(bool isVisible)
+    {
+        GotchiSelect_Menu.SetActive(isVisible);
     }
 
     public void SetAvatarById(int id)
     {
         var gotchiSvg = GotchiDataManager.Instance.GetGotchiSvgsById(id);
+        if (gotchiSvg == null) return;
+
         GotchiSelectCanvas.Instance.AvatarSvgImage.sprite =
             SvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingUI.CustomizeSVG(gotchiSvg.svg), Vector2.zero);
         GotchiSelectCanvas.Instance.GotchiStatsCard.UpdateStatsCard();
