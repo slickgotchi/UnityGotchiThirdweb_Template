@@ -144,8 +144,6 @@ namespace GotchiHub
                 {
                     SetSelectedGotchiById(GetGotchiIdOfHighestBRS());
 
-                    // update canvas
-                    //gotchiSelectCanvas.UpdateGotchiList();
                     onFetchGotchiDataSuccess?.Invoke();
                 }
 

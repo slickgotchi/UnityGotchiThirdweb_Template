@@ -20,11 +20,15 @@ namespace GotchiHub
 
         public SVGImage AvatarSvgImage;
         public GotchiStatsCard GotchiStatsCard;
+
+        [Header("Menus")]
         public GameObject GotchiSelect_Menu;
         public GameObject GotchiSelect_Loading;
         public GameObject GotchiSelect_NoGotchis;
+        public GameObject GotchiSelect_NotConnected;
 
         public TMPro.TextMeshProUGUI LoadingInfoText;
+        public TMPro.TextMeshProUGUI WalletInfoText;
 
         private string m_walletAddress = "";
 
@@ -47,9 +51,7 @@ namespace GotchiHub
 
         private void Start()
         {
-            GotchiSelect_Menu.SetActive(false);
-            GotchiSelect_Loading.SetActive(false);
-            GotchiSelect_NoGotchis.SetActive(false);
+            HideAllMenus();
 
             // Clear out gotchi list children
             ClearGotchiListChildren();
@@ -69,7 +71,7 @@ namespace GotchiHub
 
         void HandleOnClick_VisitAavegotchiButton()
         {
-            Application.OpenURL("dapp.aavegotchi.com");
+            Application.OpenURL("https://dapp.aavegotchi.com/baazaar/aavegotchis");
         }
 
         void HandleOnFetchGotchiDataSuccess()
@@ -85,11 +87,19 @@ namespace GotchiHub
                 GotchiSelect_Loading.SetActive(true);
                 GotchiSelect_Menu.SetActive(false);
 
+                var connected = await ThirdwebManager.Instance.SDK.Wallet.IsConnected();
+                if (!connected)
+                {
+                    HideAllMenus();
+                    GotchiSelect_NotConnected.SetActive(true);
+                }
+
                 var address = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
 
                 if (address != m_walletAddress)
                 {
                     m_walletAddress = address;
+                    WalletInfoText.text = m_walletAddress;
                     await gotchiDataManager.FetchGotchiData();
 
                     if (gotchiDataManager.gotchiData.Count > 0)
@@ -100,7 +110,7 @@ namespace GotchiHub
                 }
 
                 // Show menu
-                GotchiSelect_Loading.SetActive(false);
+                HideAllMenus();
                 GotchiSelect_Menu.SetActive(gotchiDataManager.gotchiData.Count > 0);
                 GotchiSelect_NoGotchis.SetActive(gotchiDataManager.gotchiData.Count <= 0);
 
@@ -116,16 +126,21 @@ namespace GotchiHub
         private void Update()
         {
             // Check for clicks outside menu box
-            if (Input.GetMouseButtonDown(0) && !m_isShowButtonJustClicked && GotchiSelect_Menu.activeSelf)
+            if (Input.GetMouseButtonDown(0) && !m_isShowButtonJustClicked)
             {
-                var menuRect = GotchiSelect_Menu.GetComponent<RectTransform>();
-                var isMenuClick = RectTransformUtility.RectangleContainsScreenPoint(menuRect, Input.mousePosition);
+                RectTransform menuRect = null;
+                if (GotchiSelect_Menu.activeSelf) menuRect = GotchiSelect_Menu.GetComponent<RectTransform>();
+                if (GotchiSelect_Loading.activeSelf) menuRect = GotchiSelect_Loading.GetComponent<RectTransform>();
+                if (GotchiSelect_NoGotchis.activeSelf) menuRect = GotchiSelect_NoGotchis.GetComponent<RectTransform>();
+                if (GotchiSelect_NotConnected.activeSelf) menuRect = GotchiSelect_NotConnected.GetComponent<RectTransform>();
 
-                // Hide menus
-                if (!isMenuClick)
+                if (menuRect != null)
                 {
-                    GotchiSelect_Loading.SetActive(false);
-                    GotchiSelect_Menu.SetActive(false);
+                    // Hide menus
+                    if (!RectTransformUtility.RectangleContainsScreenPoint(menuRect, Input.mousePosition))
+                    {
+                        HideAllMenus();
+                    }
                 }
             }
 
@@ -136,6 +151,14 @@ namespace GotchiHub
             {
                 LoadingInfoText.text = gotchiDataManager.Status;
             }
+        }
+
+        void HideAllMenus()
+        {
+            GotchiSelect_Loading.SetActive(false);
+            GotchiSelect_Menu.SetActive(false);
+            GotchiSelect_NoGotchis.SetActive(false);
+            GotchiSelect_NotConnected.SetActive(false);
         }
 
         private void InitAvatarById(int id)

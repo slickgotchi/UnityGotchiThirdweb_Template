@@ -12,6 +12,8 @@ namespace GotchiHub
         public TextMeshProUGUI ApText;
         public TextMeshProUGUI DoubleStrikeText;
         public TextMeshProUGUI CritDamageText;
+        public TextMeshProUGUI KinshipText;
+        public TextMeshProUGUI LevelText;
 
         public void UpdateStatsCard()
         {
@@ -45,6 +47,8 @@ namespace GotchiHub
             }
             */
 
+            GotchiNameText.text = gotchiData.name + " (" + gotchiData.id + ")";
+
             HpText.text = hp.ToString("F0");
             AtkText.text = attack.ToString("F0");
             CritText.text = (critical * 100).ToString("F0") + "%";
@@ -52,7 +56,9 @@ namespace GotchiHub
             DoubleStrikeText.text = (doubleStrike * 100).ToString("F0") + "%";
             CritDamageText.text = critDamage.ToString("F2") + "x";
 
-            GotchiNameText.text = gotchiData.name + " (" + gotchiData.id + ")";
+            KinshipText.text = kinship.ToString();
+            LevelText.text = level.ToString();   
+
         }
     }
 }
