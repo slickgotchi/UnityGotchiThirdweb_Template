@@ -6,7 +6,7 @@ public enum TraitType
     NRG, AGG, SPK, BRN, EYS, EYC
 };
 
-public static class GotchiStatCalculator
+public static class DroptStatCalculator
 {
     private static readonly float TraitDeltaCap = 60;
     private static readonly float expA = 1;
@@ -56,6 +56,32 @@ public static class GotchiStatCalculator
         float yPlus = (float)Math.Pow(expA * (1 + expR), x);
         float yPlusNormalized = (yPlus - 1) / expR;
         return yPlusNormalized * (statRange.High - statRange.Low) + statRange.Low;
+    }
+
+    public static int GetBRS(int nrg, int agg, int spk, int brn, int eys, int eyc)
+    {
+        int[] traits = new int[] { nrg, agg, spk, brn, eys, eyc };
+
+        int brs = 0;
+        for (int i = 0; i < traits.Length; i++)
+        {
+            if (traits[i] < 50) brs += 100 - traits[i];
+            else brs += traits[i] + 1;
+        }
+
+        return brs;
+    }
+
+    public static int GetBRS(short[] traits)
+    {
+        int brs = 0;
+        for (int i = 0; i < traits.Length; i++)
+        {
+            if (traits[i] < 50) brs += 100 - traits[i];
+            else brs += traits[i] + 1;
+        }
+
+        return brs;
     }
 }
 
