@@ -7,6 +7,9 @@ namespace GotchiHub
         public float speed = 5f;
         public SpriteRenderer Body;
 
+        public Material DefaultSpriteMaterial;
+        public Material SvgSpriteMaterial;
+
         private Sprite m_back;
         private Sprite m_front;
         private Sprite m_left;
@@ -19,6 +22,8 @@ namespace GotchiHub
                 Debug.Log("Listening to gotchi data manager");
                 GotchiDataManager.Instance.onSelectedGotchi += OnSelectedGotchiChanged;
             }
+
+            Body.material = DefaultSpriteMaterial;
         }
 
         private void OnDisable()
@@ -83,6 +88,7 @@ namespace GotchiHub
 
             // Set initial sprite
             Body.sprite = m_front;
+            Body.material = SvgSpriteMaterial;
         }
 
         private Sprite GetSpriteFromSvgString(string svgString)
