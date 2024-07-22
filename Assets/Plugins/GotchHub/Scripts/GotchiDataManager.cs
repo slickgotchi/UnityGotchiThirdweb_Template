@@ -13,8 +13,8 @@ namespace GotchiHub
     {
         public static GotchiDataManager Instance { get; private set; }
 
+        [Header("Graph Manager")]
         public GraphManager graphManager;
-        //public GotchiSelectCanvas gotchiSelectCanvas;
 
         [Header("Materials")]
         public Material Material_Sprite_Unlit_Default;
@@ -23,7 +23,7 @@ namespace GotchiHub
         public Material Material_Unlit_VectorGradientUI;
         public Material Material_Unlit_VectorUI;
 
-        [Header("Styling")]
+        [Header("Sprite Styling")]
         public GotchiSvgStyling stylingGame;
         public GotchiSvgStyling stylingUI;
 
@@ -34,7 +34,7 @@ namespace GotchiHub
         private int m_selectedGotchiId = 0;
         public int GetSelectedGotchiId() { return m_selectedGotchiId; }
 
-        public string Status = "";
+        [HideInInspector] public string StatusString = "";
 
         // Event declaration
         public event Action<int> onSelectedGotchi;
@@ -100,21 +100,21 @@ namespace GotchiHub
 
         public async UniTask FetchGotchiData()
         {
-            // 1. check thirdweb for connection
             try
             {
+                // clear all current data
                 gotchiData.Clear();
                 gotchiSvgSets.Clear();
                 gotchiIds.Clear();
 
                 // get wallet address
-                Status = "Validating wallet address...";
+                StatusString = "Validating wallet address...";
                 var walletAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
                 walletAddress = walletAddress.ToLower();
 
 
                 // fetch gotchis with aavegotchi kit
-                Status = "Wallet validated. Fetching gotchi data...";
+                StatusString = "Wallet validated. Fetching gotchi data...";
                 var userAccount = await graphManager.GetUserAccount(walletAddress);
 
                 // save base gotchi data
@@ -125,7 +125,7 @@ namespace GotchiHub
                 }
 
                 // get svgs
-                Status = userAccount.gotchisOwned.Length.ToString() + " gotchis found. Processing SVGs...";
+                StatusString = userAccount.gotchisOwned.Length.ToString() + " gotchis found. Processing SVGs...";
                 var svgs = await graphManager.GetGotchiSvgs(gotchiIds);
                 foreach (var svgSet in svgs)
                 {
@@ -139,10 +139,10 @@ namespace GotchiHub
                 }
 
                 // default to highest brs gotchi
-                Status = "SVGs processed. Updating gotchi inventory...";
+                StatusString = "SVGs processed. Updating gotchi inventory...";
                 if (gotchiData.Count > 0)
                 {
-                    SetSelectedGotchiById(GetGotchiIdOfHighestBRS());
+                    SetSelectedGotchiById(GetGotchiIdByHighestBRS());
 
                     onFetchGotchiDataSuccess?.Invoke();
                 }
@@ -154,7 +154,7 @@ namespace GotchiHub
             }
         }
 
-        public int GetGotchiIdOfHighestBRS()
+        public int GetGotchiIdByHighestBRS()
         {
             int highestBrs = 0;
             int highestBrsId = -1;

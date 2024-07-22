@@ -16,8 +16,8 @@ public static class DroptStatCalculator
     private static readonly LowHigh Attack = new LowHigh { Low = 50, High = 100 };
     private static readonly LowHigh CriticalChance = new LowHigh { Low = 0.05f, High = 0.25f };
     private static readonly LowHigh ApMax = new LowHigh { Low = 200, High = 500 };
-    private static readonly LowHigh DoubleStrike = new LowHigh { Low = 0.01f, High = 0.12f };
-    private static readonly LowHigh CriticalDamage = new LowHigh { Low = 1, High = 1.55f };
+    private static readonly LowHigh DoubleStrike = new LowHigh { Low = 0.01f, High = 0.15f };
+    private static readonly LowHigh CriticalDamage = new LowHigh { Low = 1.2f, High = 1.75f };
 
     // enum for stat picking
     public enum StatType

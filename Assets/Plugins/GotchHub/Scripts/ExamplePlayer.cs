@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace GotchiHub
 {
-    public class Player : MonoBehaviour
+    public class ExamplePlayer : MonoBehaviour
     {
         private float k_speed = 6.22f;
         public SpriteRenderer BodySpriteRenderer;
@@ -90,7 +90,7 @@ namespace GotchiHub
         private Sprite GetSpriteFromSvgString(string svgString)
         {
             // Convert SVG string to a Sprite
-            return DroptSvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingGame.CustomizeSVG(svgString), new Vector2(0.5f, 0.15f));
+            return CustomSvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingGame.CustomizeSVG(svgString), new Vector2(0.5f, 0.15f));
         }
     }
 }

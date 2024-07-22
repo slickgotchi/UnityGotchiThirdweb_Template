@@ -8,8 +8,8 @@ namespace GotchiHub
 {
     public class GotchiSelectListItem : MonoBehaviour
     {
-        public int Id = 0;
-        public int BRS = 0;
+        [HideInInspector] public int Id = 0;
+        [HideInInspector] public int BRS = 0;
 
         private Button m_button;
         private TMPro.TextMeshProUGUI m_nameText;
@@ -36,7 +36,7 @@ namespace GotchiHub
             Id = id;
             var gotchiSvg = GotchiDataManager.Instance.GetGotchiSvgsById(id);
             var gotchiData = GotchiDataManager.Instance.GetGotchiDataById(id);
-            m_svgImage.sprite = DroptSvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingUI.CustomizeSVG(gotchiSvg.Front), Vector2.zero);
+            m_svgImage.sprite = CustomSvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingUI.CustomizeSVG(gotchiSvg.Front), Vector2.zero);
             m_svgImage.material = GotchiDataManager.Instance.Material_Unlit_VectorGradientUI;
             m_nameText.text = gotchiData.name;
             BRS = DroptStatCalculator.GetBRS(gotchiData.numericTraits);

@@ -12,12 +12,12 @@ namespace GotchiHub
     {
         public static GotchiSelectCanvas Instance { get; private set; }
 
-        public GotchiDataManager gotchiDataManager;
-        public Button SelectGotchiButton;
-        public Button VisitAavegotchiButton;
-        public GameObject gotchiList;
+        [Header("Prefabs")]
         public GameObject gotchiListItemPrefab;
 
+        [Header("Child Object References")]
+        public Button SelectGotchiButton;
+        public GameObject gotchiList;
         public SVGImage AvatarSvgImage;
         public GotchiStatsCard GotchiStatsCard;
 
@@ -27,11 +27,14 @@ namespace GotchiHub
         public GameObject GotchiSelect_NoGotchis;
         public GameObject GotchiSelect_NotConnected;
 
+        [Header("Menu Items")]
         public TMPro.TextMeshProUGUI LoadingInfoText;
         public TMPro.TextMeshProUGUI WalletInfoText;
+        public Button VisitAavegotchiButton;
 
+        // private variables
+        private GotchiDataManager m_gotchiDataManager;
         private string m_walletAddress = "";
-
         private bool m_isShowButtonJustClicked = false;
 
         public enum ReorganizeMethod
@@ -51,13 +54,22 @@ namespace GotchiHub
 
         private void Start()
         {
+            if (GotchiDataManager.Instance == null)
+            {
+                Debug.LogError("A GotchiDataManager must be available in the scene");
+                return;
+            }
+
+            // get the gotchi data manager
+            m_gotchiDataManager = GotchiDataManager.Instance;
+
             HideAllMenus();
 
             // Clear out gotchi list children
             ClearGotchiListChildren();
 
             // sign up to onFetchData success function
-            GotchiDataManager.Instance.onFetchGotchiDataSuccess += HandleOnFetchGotchiDataSuccess;
+            m_gotchiDataManager.onFetchGotchiDataSuccess += HandleOnFetchGotchiDataSuccess;
         }
 
         private void OnDestroy()
@@ -65,7 +77,7 @@ namespace GotchiHub
             // Unsubscribe from events
             SelectGotchiButton.onClick.RemoveListener(HandleOnClick_GotchiSelect_ShowButton);
             VisitAavegotchiButton.onClick.RemoveListener(HandleOnClick_VisitAavegotchiButton);
-            GotchiDataManager.Instance.onFetchGotchiDataSuccess -= HandleOnFetchGotchiDataSuccess;
+            m_gotchiDataManager.onFetchGotchiDataSuccess -= HandleOnFetchGotchiDataSuccess;
         }
 
 
@@ -100,19 +112,19 @@ namespace GotchiHub
                 {
                     m_walletAddress = address;
                     WalletInfoText.text = m_walletAddress;
-                    await gotchiDataManager.FetchGotchiData();
+                    await m_gotchiDataManager.FetchGotchiData();
 
-                    if (gotchiDataManager.gotchiData.Count > 0)
+                    if (m_gotchiDataManager.gotchiData.Count > 0)
                     {
                         // Highlight the highest brs gotchi
-                        HighlightById(gotchiDataManager.GetSelectedGotchiId());
+                        HighlightById(m_gotchiDataManager.GetSelectedGotchiId());
                     }
                 }
 
                 // Show menu
                 HideAllMenus();
-                GotchiSelect_Menu.SetActive(gotchiDataManager.gotchiData.Count > 0);
-                GotchiSelect_NoGotchis.SetActive(gotchiDataManager.gotchiData.Count <= 0);
+                GotchiSelect_Menu.SetActive(m_gotchiDataManager.gotchiData.Count > 0);
+                GotchiSelect_NoGotchis.SetActive(m_gotchiDataManager.gotchiData.Count <= 0);
 
             }
             catch (System.Exception e)
@@ -149,7 +161,7 @@ namespace GotchiHub
             // update loading info text (if its active)
             if (LoadingInfoText.enabled)
             {
-                LoadingInfoText.text = gotchiDataManager.Status;
+                LoadingInfoText.text = m_gotchiDataManager.StatusString;
             }
         }
 
@@ -163,19 +175,19 @@ namespace GotchiHub
 
         private void InitAvatarById(int id)
         {
-            var gotchiSvg = GotchiDataManager.Instance.GetGotchiSvgsById(id);
+            var gotchiSvg = m_gotchiDataManager.GetGotchiSvgsById(id);
             if (gotchiSvg == null) return;
 
             AvatarSvgImage.sprite =
-                DroptSvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingUI.CustomizeSVG(gotchiSvg.Front), Vector2.zero);
-            AvatarSvgImage.material = GotchiDataManager.Instance.Material_Unlit_VectorGradientUI;
+                CustomSvgLoader.CreateSvgSprite(m_gotchiDataManager.stylingUI.CustomizeSVG(gotchiSvg.Front), Vector2.zero);
+            AvatarSvgImage.material = m_gotchiDataManager.Material_Unlit_VectorGradientUI;
 
             GotchiStatsCard.UpdateStatsCard();
         }
 
         public void HighlightById(int id)
         {
-            var gotchiData = GotchiDataManager.Instance.GetGotchiDataById(id);
+            var gotchiData = m_gotchiDataManager.GetGotchiDataById(id);
             if (gotchiData == null) return;
 
             // Deselect all selections except our chosen
@@ -195,8 +207,8 @@ namespace GotchiHub
             ClearGotchiListChildren();
 
             // Create new instance of gotchi list item and set parent to gotchi list
-            var gotchiSvgs = gotchiDataManager.gotchiSvgSets;
-            var gotchiData = gotchiDataManager.gotchiData;
+            var gotchiSvgs = m_gotchiDataManager.gotchiSvgSets;
+            var gotchiData = m_gotchiDataManager.gotchiData;
             for (int i = 0; i < gotchiSvgs.Count; i++)
             {
                 var newListItem = Instantiate(gotchiListItemPrefab);
@@ -208,7 +220,7 @@ namespace GotchiHub
 
             // Organize list by BRS
             ReorganizeList(ReorganizeMethod.BRSHighToLow); // Example usage, you can change the method as needed
-            HighlightById(gotchiDataManager.GetSelectedGotchiId());
+            HighlightById(m_gotchiDataManager.GetSelectedGotchiId());
 
         }
 
@@ -226,6 +238,8 @@ namespace GotchiHub
             {
                 Destroy(child);
             }
+
+            children.Clear();
         }
 
         public void ReorganizeList(ReorganizeMethod method)
