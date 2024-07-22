@@ -17,7 +17,7 @@ namespace GotchiHub
         {
             if (GotchiDataManager.Instance.gotchiData.Count <= 0) return;
 
-            var gotchiData = GotchiDataManager.Instance.GetGotchiDataBySelected();
+            var gotchiData = GotchiDataManager.Instance.GetGotchiDataById(GotchiDataManager.Instance.GetSelectedGotchiId());
             if (gotchiData == null) return;
 
             // get kinship

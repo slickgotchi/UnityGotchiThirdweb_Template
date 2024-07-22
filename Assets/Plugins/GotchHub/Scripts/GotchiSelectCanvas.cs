@@ -53,11 +53,28 @@ namespace GotchiHub
 
             // Clear out gotchi list children
             ClearGotchiListChildren();
+
+            // sign up to onFetchData success function
+            GotchiDataManager.Instance.onFetchGotchiDataSuccess += HandleOnFetchGotchiDataSuccess;
         }
+
+        private void OnDestroy()
+        {
+            // Unsubscribe from events
+            SelectGotchiButton.onClick.RemoveListener(HandleOnClick_GotchiSelect_ShowButton);
+            VisitAavegotchiButton.onClick.RemoveListener(HandleOnClick_VisitAavegotchiButton);
+            GotchiDataManager.Instance.onFetchGotchiDataSuccess -= HandleOnFetchGotchiDataSuccess;
+        }
+
 
         void HandleOnClick_VisitAavegotchiButton()
         {
             Application.OpenURL("dapp.aavegotchi.com");
+        }
+
+        void HandleOnFetchGotchiDataSuccess()
+        {
+            UpdateGotchiList();
         }
 
         async void HandleOnClick_GotchiSelect_ShowButton()
@@ -127,7 +144,9 @@ namespace GotchiHub
             if (gotchiSvg == null) return;
 
             AvatarSvgImage.sprite =
-                SvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingUI.CustomizeSVG(gotchiSvg.svg), Vector2.zero);
+                DroptSvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingUI.CustomizeSVG(gotchiSvg.Front), Vector2.zero);
+            AvatarSvgImage.material = GotchiDataManager.Instance.Material_Unlit_VectorGradientUI;
+
             GotchiStatsCard.UpdateStatsCard();
         }
 
@@ -153,7 +172,7 @@ namespace GotchiHub
             ClearGotchiListChildren();
 
             // Create new instance of gotchi list item and set parent to gotchi list
-            var gotchiSvgs = gotchiDataManager.gotchiSvgs;
+            var gotchiSvgs = gotchiDataManager.gotchiSvgSets;
             var gotchiData = gotchiDataManager.gotchiData;
             for (int i = 0; i < gotchiSvgs.Count; i++)
             {

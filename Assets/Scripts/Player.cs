@@ -4,16 +4,14 @@ namespace GotchiHub
 {
     public class Player : MonoBehaviour
     {
-        public float speed = 5f;
-        public SpriteRenderer Body;
+        private float k_speed = 6.22f;
+        public SpriteRenderer BodySpriteRenderer;
 
-        public Material DefaultSpriteMaterial;
-        public Material SvgSpriteMaterial;
-
-        private Sprite m_back;
-        private Sprite m_front;
-        private Sprite m_left;
-        private Sprite m_right;
+        [Header("Sprites")]
+        public Sprite m_frontSprite;
+        public Sprite m_backSprite;
+        public Sprite m_leftSprite;
+        public Sprite m_rightSprite;
 
         private void Start()
         {
@@ -23,10 +21,10 @@ namespace GotchiHub
                 GotchiDataManager.Instance.onSelectedGotchi += OnSelectedGotchiChanged;
             }
 
-            Body.material = DefaultSpriteMaterial;
+            BodySpriteRenderer.material = GotchiDataManager.Instance.Material_Sprite_Unlit_Default;
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
             if (GotchiDataManager.Instance != null)
             {
@@ -45,32 +43,30 @@ namespace GotchiHub
             float moveVertical = Input.GetAxis("Vertical");
 
             Vector3 movement = new Vector3(moveHorizontal, moveVertical, 0.0f);
-            transform.Translate(movement * speed * Time.deltaTime, Space.World);
+            transform.Translate(movement * k_speed * Time.deltaTime, Space.World);
 
             UpdateSpriteDirection(movement);
         }
 
         private void UpdateSpriteDirection(Vector3 movement)
         {
-            if (GotchiDataManager.Instance.gotchiData.Count <= 0) return;
-
             if (movement.magnitude > 0)
             {
                 if (movement.y > 0)
                 {
-                    Body.sprite = m_back;
+                    BodySpriteRenderer.sprite = m_backSprite;
                 }
                 else if (movement.y < 0)
                 {
-                    Body.sprite = m_front;
+                    BodySpriteRenderer.sprite = m_frontSprite;
                 }
                 else if (movement.x > 0)
                 {
-                    Body.sprite = m_right;
+                    BodySpriteRenderer.sprite = m_rightSprite;
                 }
                 else if (movement.x < 0)
                 {
-                    Body.sprite = m_left;
+                    BodySpriteRenderer.sprite = m_leftSprite;
                 }
             }
         }
@@ -81,20 +77,20 @@ namespace GotchiHub
             var gotchiSvgs = GotchiDataManager.Instance.GetGotchiSvgsById(newGotchiId);
 
             // Cache the sprites
-            m_front = GetSpriteFromSvgString(gotchiSvgs.svg);
-            m_back = GetSpriteFromSvgString(gotchiSvgs.back);
-            m_left = GetSpriteFromSvgString(gotchiSvgs.left);
-            m_right = GetSpriteFromSvgString(gotchiSvgs.right);
+            m_frontSprite = GetSpriteFromSvgString(gotchiSvgs.Front);
+            m_backSprite = GetSpriteFromSvgString(gotchiSvgs.Back);
+            m_leftSprite = GetSpriteFromSvgString(gotchiSvgs.Left);
+            m_rightSprite = GetSpriteFromSvgString(gotchiSvgs.Right);
 
             // Set initial sprite
-            Body.sprite = m_front;
-            Body.material = SvgSpriteMaterial;
+            BodySpriteRenderer.sprite = m_frontSprite;
+            BodySpriteRenderer.material = GotchiDataManager.Instance.Material_Unlit_VectorGradient;
         }
 
         private Sprite GetSpriteFromSvgString(string svgString)
         {
             // Convert SVG string to a Sprite
-            return SvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingGame.CustomizeSVG(svgString), Vector2.zero);
+            return DroptSvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingGame.CustomizeSVG(svgString), new Vector2(0.5f, 0.15f));
         }
     }
 }

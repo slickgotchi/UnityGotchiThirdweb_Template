@@ -479,7 +479,7 @@ GameObject:
   - component: {fileID: 318240816547230953}
   - component: {fileID: 2457202210373649099}
   m_Layer: 5
-  m_Name: GotchiStatsCard
+  m_Name: GH_GotchiStatsCard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

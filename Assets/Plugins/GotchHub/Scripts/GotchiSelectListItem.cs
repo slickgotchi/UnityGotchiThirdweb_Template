@@ -36,7 +36,8 @@ namespace GotchiHub
             Id = id;
             var gotchiSvg = GotchiDataManager.Instance.GetGotchiSvgsById(id);
             var gotchiData = GotchiDataManager.Instance.GetGotchiDataById(id);
-            m_svgImage.sprite = SvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingUI.CustomizeSVG(gotchiSvg.svg), Vector2.zero);
+            m_svgImage.sprite = DroptSvgLoader.CreateSvgSprite(GotchiDataManager.Instance.stylingUI.CustomizeSVG(gotchiSvg.Front), Vector2.zero);
+            m_svgImage.material = GotchiDataManager.Instance.Material_Unlit_VectorGradientUI;
             m_nameText.text = gotchiData.name;
             BRS = DroptStatCalculator.GetBRS(gotchiData.numericTraits);
         }

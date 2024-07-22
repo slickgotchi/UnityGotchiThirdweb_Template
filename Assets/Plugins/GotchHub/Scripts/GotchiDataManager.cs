@@ -14,41 +14,36 @@ namespace GotchiHub
         public static GotchiDataManager Instance { get; private set; }
 
         public GraphManager graphManager;
-        public GotchiSelectCanvas gotchiSelectCanvas;
+        //public GotchiSelectCanvas gotchiSelectCanvas;
 
+        [Header("Materials")]
+        public Material Material_Sprite_Unlit_Default;
+        public Material Material_Sprite_Lit_Default;
+        public Material Material_Unlit_VectorGradient;
+        public Material Material_Unlit_VectorGradientUI;
+        public Material Material_Unlit_VectorUI;
+
+        [Header("Styling")]
         public GotchiSvgStyling stylingGame;
         public GotchiSvgStyling stylingUI;
 
-        public List<GotchiData> gotchiData = new List<GotchiData>();
-        public List<GotchiSvgs> gotchiSvgs = new List<GotchiSvgs>();
-        public List<string> gotchiIds = new List<string>();
+        [HideInInspector] public List<GotchiData> gotchiData = new List<GotchiData>();
+        [HideInInspector] public List<GotchiSvgSet> gotchiSvgSets = new List<GotchiSvgSet>();
+        [HideInInspector] public List<string> gotchiIds = new List<string>();
 
         private int m_selectedGotchiId = 0;
+        public int GetSelectedGotchiId() { return m_selectedGotchiId; }
 
         public string Status = "";
 
         // Event declaration
         public event Action<int> onSelectedGotchi;
+        public event Action onFetchGotchiDataSuccess;
 
         private void Awake()
         {
             Instance = this;
         }
-
-        public int GetSelectedGotchiId() { return m_selectedGotchiId; }
-
-        //private bool SetSelectedGotchiByIndex(int index)
-        //{
-        //    if (index >= gotchiData.Count)
-        //    {
-        //        Debug.Log("Can not set index " + index + " with gotchiData count of " + gotchiData.Count);
-        //        return false;
-        //    }
-
-        //    m_selectedGotchiId = gotchiData[index].id;
-        //    onSelectedGotchi?.Invoke(m_selectedGotchiId); // Trigger event
-        //    return true;
-        //}
 
         public bool SetSelectedGotchiById(int id)
         {
@@ -91,12 +86,7 @@ namespace GotchiHub
             return gotchiData[index];
         }
 
-        public GotchiData GetGotchiDataBySelected()
-        {
-            return GetGotchiDataById(m_selectedGotchiId);
-        }
-
-        public GotchiSvgs GetGotchiSvgsById(int id)
+        public GotchiSvgSet GetGotchiSvgsById(int id)
         {
             var index = GetGotchiIndexById(id);
             if (index < 0)
@@ -105,12 +95,7 @@ namespace GotchiHub
                 return null;
             }
 
-            return gotchiSvgs[index];
-        }
-
-        public GotchiSvgs GetGotchiSvgsBySelected()
-        {
-            return GetGotchiSvgsById(m_selectedGotchiId);
+            return gotchiSvgSets[index];
         }
 
         public async UniTask FetchGotchiData()
@@ -119,7 +104,7 @@ namespace GotchiHub
             try
             {
                 gotchiData.Clear();
-                gotchiSvgs.Clear();
+                gotchiSvgSets.Clear();
                 gotchiIds.Clear();
 
                 // get wallet address
@@ -144,12 +129,12 @@ namespace GotchiHub
                 var svgs = await graphManager.GetGotchiSvgs(gotchiIds);
                 foreach (var svgSet in svgs)
                 {
-                    gotchiSvgs.Add(new GotchiSvgs
+                    gotchiSvgSets.Add(new GotchiSvgSet
                     {
-                        svg = svgSet.svg,
-                        back = svgSet.back,
-                        left = svgSet.left,
-                        right = svgSet.right,
+                        Front = svgSet.svg,
+                        Back = svgSet.back,
+                        Left = svgSet.left,
+                        Right = svgSet.right,
                     });
                 }
 
@@ -160,7 +145,8 @@ namespace GotchiHub
                     SetSelectedGotchiById(GetGotchiIdOfHighestBRS());
 
                     // update canvas
-                    gotchiSelectCanvas.UpdateGotchiList();
+                    //gotchiSelectCanvas.UpdateGotchiList();
+                    onFetchGotchiDataSuccess?.Invoke();
                 }
 
             }
@@ -189,11 +175,19 @@ namespace GotchiHub
         }
     }
 
-    public class GotchiSvgs
+    public class GotchiSvgSet
     {
-        public string svg;
-        public string back;
-        public string left;
-        public string right;
+        public string Front;
+        public string Back;
+        public string Left;
+        public string Right;
+    }
+
+    public class GotchiSpriteSet
+    {
+        public Sprite Front;
+        public Sprite Back;
+        public Sprite Left;
+        public Sprite Right;
     }
 }
