@@ -27,6 +27,9 @@ namespace GotchiHub
 
         public string Status = "";
 
+        // Event declaration
+        public event Action<int> onSelectedGotchi;
+
         private void Awake()
         {
             Instance = this;
@@ -34,17 +37,18 @@ namespace GotchiHub
 
         public int GetSelectedGotchiId() { return m_selectedGotchiId; }
 
-        private bool SetSelectedGotchiByIndex(int index)
-        {
-            if (index >= gotchiData.Count)
-            {
-                Debug.Log("Can not set index " + index + " with gotchiData count of " + gotchiData.Count);
-                return false;
-            }
+        //private bool SetSelectedGotchiByIndex(int index)
+        //{
+        //    if (index >= gotchiData.Count)
+        //    {
+        //        Debug.Log("Can not set index " + index + " with gotchiData count of " + gotchiData.Count);
+        //        return false;
+        //    }
 
-            m_selectedGotchiId = gotchiData[index].id;
-            return true;
-        }
+        //    m_selectedGotchiId = gotchiData[index].id;
+        //    onSelectedGotchi?.Invoke(m_selectedGotchiId); // Trigger event
+        //    return true;
+        //}
 
         public bool SetSelectedGotchiById(int id)
         {
@@ -53,6 +57,7 @@ namespace GotchiHub
                 if (id == gotchiData[i].id)
                 {
                     m_selectedGotchiId = id;
+                    onSelectedGotchi?.Invoke(m_selectedGotchiId); // Trigger event
                     return true;
                 }
             }
@@ -152,7 +157,7 @@ namespace GotchiHub
                 Status = "SVGs processed. Updating gotchi inventory...";
                 if (gotchiData.Count > 0)
                 {
-                    m_selectedGotchiId = GetGotchiIdOfHighestBRS();
+                    SetSelectedGotchiById(GetGotchiIdOfHighestBRS());
 
                     // update canvas
                     gotchiSelectCanvas.UpdateGotchiList();
@@ -182,7 +187,6 @@ namespace GotchiHub
 
             return highestBrsId;
         }
-
     }
 
     public class GotchiSvgs
